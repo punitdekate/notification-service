@@ -27,6 +27,8 @@ export default class NotificationController {
             }
         });
 
+        logger.info(`${process.env.GMAIL_NOTIFICATION_USERNAME}, ${process.env.GMAIL_NOTIFICATION_SECRET}`);
+
         const options = {
             from: process.env.GMAIL_NOTIFICATION_USERNAME,
             to: Array.isArray(to) ? to.join(",") : to,
@@ -43,7 +45,7 @@ export default class NotificationController {
 
             return successResponse(res, { messageId: info.messageId, response: info.response }, 200);
         } catch (err) {
-            logger.error(`Error sending email: ${err.message}`);
+            logger.error(`Error sending email: ${err.message || err}`);
             next(new InternalServerError(serviceErrors.EMAIL_SENDING_FAILED));
         }
     }
