@@ -23,7 +23,10 @@ export default class NotificationController {
             const response = await resend.emails.send({
                 from: from,
                 to: Array.isArray(to) ? to.join(",") : to,
+                cc: Array.isArray(cc) ? cc.join(",") : cc,
+                bcc: Array.isArray(bcc) ? bcc.join(",") : bcc,
                 subject: subject,
+                text: text,
                 html: html
             });
 
