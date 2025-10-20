@@ -27,7 +27,7 @@ export default class NotificationController {
             }
         });
 
-        logger.info(`${process.env.GMAIL_NOTIFICATION_USERNAME}, ${process.env.GMAIL_NOTIFICATION_SECRET}`);
+        // logger.info(`${process.env.GMAIL_NOTIFICATION_USERNAME}, ${process.env.GMAIL_NOTIFICATION_SECRET}`);
 
         const options = {
             from: process.env.GMAIL_NOTIFICATION_USERNAME,
