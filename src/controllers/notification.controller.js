@@ -3,11 +3,12 @@ import nodemailer from "nodemailer";
 import pkg from "helper-utils-library";
 import { serviceErrors } from "../../errorMessages.js";
 import twilio from "twilio";
+import { Resend } from "resend";
 const { logger, failureResponse, BadRequest, InternalServerError, successResponse } = pkg;
 
 export default class NotificationController {
     async sendEmail(req, res, next) {
-        const { to = "", subject = "", text = "", html = "", cc = [], bcc = [] } = req.body || {};
+        const { from = "", to = "", subject = "", text = "", html = "", cc = [], bcc = [], mailerType = "resend" } = req.body || {};
 
         const required = ["to", "subject"];
         for (const field of required) {
@@ -15,6 +16,20 @@ export default class NotificationController {
                 return failureResponse(res, new BadRequest(`Field '${field}' is required.`), 400);
             }
         }
+
+        if (mailerType === "resend") {
+            const resend = new Resend(process.env.RESEND_AUTH);
+
+            const response = await resend.emails.send({
+                from: from,
+                to: Array.isArray(to) ? to.join(",") : to,
+                subject: subject,
+                html: html
+            });
+
+            return successResponse(res, response, 200);
+        }
+
         if (!process.env.GMAIL_NOTIFICATION_USERNAME || !process.env.GMAIL_NOTIFICATION_SECRET) {
             return failureResponse(res, new InternalServerError(serviceErrors.EMAIL_SERVICE_NOT_CONFIGURED), 500);
         }
@@ -26,8 +41,6 @@ export default class NotificationController {
                 pass: process.env.GMAIL_NOTIFICATION_SECRET
             }
         });
-
-        // logger.info(`${process.env.GMAIL_NOTIFICATION_USERNAME}, ${process.env.GMAIL_NOTIFICATION_SECRET}`);
 
         const options = {
             from: process.env.GMAIL_NOTIFICATION_USERNAME,
